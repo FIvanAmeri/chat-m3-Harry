@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10100f">
+  <meta name="description" content="Una experiencia de chat mágico con Harry Potter.">
+  <title>El Pergamino — Harry Potter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Text:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles.css">
+  <script type="module" src="src/app.js"></script>
+</head>
+<body>
+  <div class="ambient ambient--one" aria-hidden="true"></div>
+  <div class="ambient ambient--two" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="/home" data-link aria-label="El Pergamino, inicio">
+      <span class="brand__sigil" aria-hidden="true">✦</span>
+      <span><span class="brand__name">EL PERGAMINO</span><span class="brand__tagline">Correspondencia mágica</span></span>
+    </a>
+    <nav class="nav" aria-label="Navegación principal">
+      <a href="/home" data-link>Inicio</a>
+      <a href="/chat" data-link>Conversar</a>
+      <a href="/about" data-link>El hechizo</a>
+    </nav>
+  </header>
+  <main id="app" tabindex="-1" aria-live="polite"></main>
+<footer class="footer">
+  <span>El mago que hizo este hechizo es : <span style="color: #ffbb00;">Albus Dumbledore</span></span>
+  <span>Hecho con un poco de magia ✧</span>
+</footer></body>
+</html>
