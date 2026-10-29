@@ -18,7 +18,15 @@ function renderAbout() {
 }
 
 function renderChat() {
-  app.innerHTML = `<section class="chat-layout page-enter"><aside class="character-panel"><div class="character-panel__frame">${avatarMarkup()}</div><p class="overline">GRYFFINDOR</p><h1>Harry Potter</h1><p class="character-panel__quote">“No son nuestras habilidades las que muestran quiénes somos, sino nuestras elecciones.”</p><div class="status"><span class="status__dot"></span> Disponible en la sala común</div><div class="character-panel__rule">✦ ━━━━━ ✦</div><p class="character-panel__hint">La magia empieza cuando preguntás.</p></aside><section class="conversation" aria-label="Conversación con Harry"><div class="conversation__header"><div><p class="overline">CANAL ENCANTADO</p><h2>Tu correspondencia</h2></div><button class="clear-button" id="clear-chat" type="button">Nuevo pergamino ↺</button></div><div class="messages" id="messages" aria-live="polite"><div class="welcome-note"><span class="welcome-note__seal">H</span><p>La tinta todavía está fresca. Escribí tu mensaje y dejá que una nueva historia comience.</p><span class="welcome-note__flourish">✧</span></div></div><form class="composer" id="composer"><label class="sr-only" for="message-input">Tu mensaje para Harry</label><textarea id="message-input" name="message" maxlength="2000" rows="1" placeholder="Escribí tu mensaje, mago…" required></textarea><button class="send-button" id="send-button" type="submit" aria-label="Enviar mensaje"><span>Enviar</span><span aria-hidden="true">✦</span></button></form><p class="composer__note">Enter para enviar · Shift + Enter para nueva línea</p></section></section>`;
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  const html = `<section class="chat-layout page-enter"><aside class="character-panel"><div class="character-panel__frame">${avatarMarkup()}</div><p class="overline">GRYFFINDOR</p><h1>Harry Potter</h1><p class="character-panel__quote">“No son nuestras habilidades las que muestran quiénes somos, sino nuestras elecciones.”</p><div class="status"><span class="status__dot"></span> Disponible en la sala común</div><div class="character-panel__rule">✦ ━━━━━ ✦</div><p class="character-panel__hint">La magia empieza cuando preguntás.</p></aside><section class="conversation" aria-label="Conversación con Harry"><div class="conversation__header"><div><p class="overline">CANAL ENCANTADO</p><h2>Tu correspondencia</h2></div><div class="header-actions"><button class="theme-toggle" id="theme-toggle" aria-label="Alternar modo claro/oscuro">${savedTheme === 'light' ? '🌙' : '☀️'}</button><button class="clear-button" id="clear-chat" type="button">Nuevo pergamino ↺</button></div></div><div class="messages" id="messages" aria-live="polite"><div class="welcome-note"><span class="welcome-note__seal">H</span><p>La tinta todavía está fresca. Escribí tu mensaje y dejá que una nueva historia comience.</p><span class="welcome-note__flourish">✧</span></div></div><form class="composer" id="composer"><label class="sr-only" for="message-input">Tu mensaje para Harry</label><textarea id="message-input" name="message" maxlength="2000" rows="1" placeholder="Escribí tu mensaje, mago…" required></textarea><button class="send-button" id="send-button" type="submit" aria-label="Enviar mensaje"><span>Enviar</span><span aria-hidden="true">✦</span></button></form><p class="composer__note">Enter para enviar · Shift + Enter para nueva línea</p></section></section>`;
+  app.innerHTML = html;
+  // Apply saved theme
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  document.documentElement.querySelector('#theme-toggle')?.setAttribute('aria-label', savedTheme === 'light' ? 'Alternar modo oscuro' : 'Alternar modo claro');
+  // Initialize theme toggle listener after DOM is rendered
+  initThemeToggle();
+  initMessageCopyButtons();
   history.forEach((item) => appendMessage(item.role === 'user' ? 'user' : 'harry', item.text, { animate: false }));
   document.querySelector('#composer').addEventListener('submit', handleSend);
   document.querySelector('#message-input').addEventListener('keydown', (event) => {
@@ -94,6 +102,116 @@ function setThinking(active) {
   } else {
     document.querySelector('#thinking-note')?.remove();
   }
+}
+
+function initThemeToggle() {
+  const toggle = document.querySelector('#theme-toggle');
+  if (!toggle) return;
+  toggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    const ariaLabel = newTheme === 'light' ? 'Alternar modo oscuro' : 'Alternar modo claro';
+    const icon = newTheme === 'light' ? '🌙' : '☀️';
+    toggle.setAttribute('aria-label', ariaLabel);
+    toggle.innerHTML = icon;
+  });
+  // Initialize with saved preference
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  const initialLabel = savedTheme === 'light' ? 'Alternar modo oscuro' : 'Alternar modo claro';
+  const initialIcon = savedTheme === 'light' ? '🌙' : '☀️';
+  toggle.setAttribute('aria-label', initialLabel);
+  toggle.innerHTML = initialIcon;
+}
+
+function initMessageCopyButtons() {
+  // Add copy buttons to existing harry messages that don't have one yet
+  document.querySelectorAll('.message-card--harry').forEach((messageCard) => {
+    if (messageCard.dataset.copyButton) return;
+    const textElement = messageCard.querySelector('.parchment__text');
+    if (!textElement) return;
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'copy-button';
+    copyBtn aria-label = 'Copiar respuesta';
+    copyBtn.innerHTML = '📋';
+    copyBtn.dataset.target = textElement.textContent.trim();
+    // Insert after the message label
+    const label = messageCard.querySelector('.message-card__label');
+    if (label) {
+      label.parentNode.insertBefore(copyBtn, label.nextSibling);
+    } else {
+      const parchment = messageCard.querySelector('.parchment');
+      if (parchment) {
+        parchment.insertBefore(copyBtn, parchment.firstChild);
+      }
+    }
+    copyBtn.addEventListener('click', async () => {
+      const text = copyBtn.dataset.target || '';
+      if (!text) {
+        alert('No hay texto para copiar');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        // Show confirmation
+        const originalHtml = copyBtn.innerHTML;
+        copyBtn.innerHTML = '✓';
+        copyBtn.style.color = 'var(--gold)';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalHtml;
+        }, 2000);
+      } catch (err) {
+        console.error('Error al copiar:', err);
+        alert('No se pudo copiar el texto');
+      }
+    });
+    messageCard.dataset.copyButton = 'true';
+  });
+  
+  // Add copy buttons to new harry messages as well
+  const observer = new MutationObserver((mutations) => {
+    document.querySelectorAll('.message-card--harry').forEach((messageCard) => {
+      if (messageCard.dataset.copyButton) return;
+      const textElement = messageCard.querySelector('.parchment__text');
+      if (!textElement) return;
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'copy-button';
+      copyBtn aria-label = 'Copiar respuesta';
+      copyBtn.innerHTML = '📋';
+      copyBtn.dataset.target = textElement.textContent.trim();
+      const label = messageCard.querySelector('.message-card__label');
+      if (label) {
+        label.parentNode.insertBefore(copyBtn, label.nextSibling);
+      } else {
+        const parchment = messageCard.querySelector('.parchment');
+        if (parchment) {
+          parchment.insertBefore(copyBtn, parchment.firstChild);
+        }
+      }
+      copyBtn.addEventListener('click', async () => {
+        const text = copyBtn.dataset.target || '';
+        if (!text) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          const originalHtml = copyBtn.innerHTML;
+          copyBtn.innerHTML = '✓';
+          copyBtn.style.color = 'var(--gold)';
+          setTimeout(() => {
+            copyBtn.innerHTML = originalHtml;
+          }, 2000);
+        } catch (err) {
+          console.error('Error al copiar:', err);
+          alert('No se pudo copiar el texto');
+        }
+      });
+      messageCard.dataset.copyButton = 'true';
+    });
+  });
+  observer.observe(document.querySelector('#messages'), { childList: true, subtree: true });
 }
 
 async function handleSend(event) {

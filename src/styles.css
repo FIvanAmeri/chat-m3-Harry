@@ -12,6 +12,25 @@
     font-size: 16px
 }
 
+/* Light theme variables */
+[data-theme="light"] {
+    --night: #faf9f7;
+    --night-soft: #f5f1ec;
+    --gold: #b8945a;
+    --gold-light: #d4c08a;
+    --ink: #2d231a;
+    --parchment: #f5e9d6;
+    --muted: #6b635a;
+    --line: rgba(172, 145, 86, .24);
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+    html {
+        color-scheme: light;
+    }
+}
+
 * {
     box-sizing: border-box
 }
@@ -136,6 +155,45 @@ main {
 .nav a.is-active {
     color: var(--gold-light);
     border-color: var(--gold)
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    background: none;
+    border: none;
+    color: var(--gold);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: .5rem;
+    border-radius: .3rem;
+    transition: background .2s, color .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    background: rgba(205, 174, 112, .16);
+    color: var(--gold-light);
+}
+
+/* Copy button */
+.copy-button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: .2rem .4rem;
+    border-radius: .3rem;
+    font-size: .75rem;
+    margin-left: .5rem;
+    transition: color .2s, background .2s;
+    vertical-align: middle;
+}
+
+.copy-button:hover {
+    color: var(--gold);
+    background: rgba(205, 174, 112, .16);
 }
 
 main {
